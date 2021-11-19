@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  vars:
+    nios_provider:
+      host: 192.168.0.200
+      username: admin
+      password: infoblox
+      wapi_version: "2.12"
+
+  connection: local
+  tasks:
+  - name: 'create DTC server'
+    infoblox.nios_modules.nios_dtc_server:
+      name: "{{ server }}"
+      host: "{{ server_ip }}"
+      comment: Created with Ansible
+      state: present
+      provider: "{{ nios_provider }}"
+...

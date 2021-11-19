@@ -1,0 +1,28 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - infoblox.b1ddi_modules
+
+  vars_files:
+    - group_vars/csp.yml
+
+  tasks:
+    - name: Read CSV File and Return a dictionary
+      read_csv:
+        path: nios_arecord.csv
+        key: fqdn*
+      register: datas
+  
+    - name: CREATE DNS View 
+      b1_a_record:
+        api_key: "{{ api }}"
+        host: "{{ host }}"
+        zone: "{{ item['value']['fqdn*'].split('.')[1] }}.{{ item['value']['fqdn*'].split('.')[2] }}"
+        address: "{{ item['value']['address*']}}"
+        name: "{{ item['value']['fqdn*'].split('.')[0] }}"
+        tags:
+          - Owner: "sbaksh"
+        comment: "This is zone"
+        state: present
+      loop: "{{ datas.dict | dict2items  }}"

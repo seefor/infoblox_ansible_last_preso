@@ -1,0 +1,54 @@
+---
+- hosts: nios
+
+  connection: local
+  tasks:
+    - name: create a the next network in 10.10.0.0/16
+      set_fact:
+        networkaddr: "{{ lookup('infoblox.nios_modules.nios_next_network', '10.10.0.0/16', cidr=20, provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+    - name: Print the range of IPs calculated above
+      debug:
+        var: networkaddr
+    - name: configure a network ipv4
+      infoblox.nios_modules.nios_network:
+        network: "{{ item }}"
+        comment: AWS VPC
+        extattrs:
+          Site: Module_dev - {{ item }}
+        state: present
+        provider: "{{nios_provider}}"
+      loop: "{{ networkaddr }}"
+
+    - name: create a VPC with default tenancy and a couple of tags
+      ec2_vpc_net:
+        aws_access_key: "YOURKEY"
+        aws_secret_key: "YOURKEY"
+        name: Module_dev - {{ item }}
+        cidr_block: "{{ item }}"
+        region: us-east-2
+        tags:
+          module: ec2_vpc_net
+          this: works
+        tenancy: default
+      loop: "{{ networkaddr }}"
+      register: my_vpc
+
+    - name: Print return information from the previous task
+      ansible.builtin.debug:
+        var: my_vpc
+# We now use the set_fact module 
+# to save the id of the VPC in a new variable.
+    - name:               Set VPC ID in variable
+      set_fact:
+        vpc_id:           "{{ my_vpc.results.0.vpc.id }}"
+
+    - name: configure a network ipv4
+      infoblox.nios_modules.nios_network:
+        network: "{{ item }}"
+        comment: AWS VPC
+        extattrs:
+          my_vpc_id: "{{ vpc_id }}"
+        state: present
+        provider: "{{nios_provider}}"
+      loop: "{{ networkaddr }}"

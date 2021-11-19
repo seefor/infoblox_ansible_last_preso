@@ -1,0 +1,5 @@
+---
+nios_provider:
+  host: 192.168.0.200
+  username: admin
+  password: infoblox

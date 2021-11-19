@@ -1,0 +1,50 @@
+---
+- hosts: nios
+
+  connection: local
+  tasks:
+    - name: Look up the Network via Network Container EA Site
+      set_fact:
+        network: "{{ lookup('nios', 'network', extattrs={'Site':'Mod_Dev'},return_fields=['network','extattrs'],provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+
+    - name: Set Network to a Variable
+      set_fact:
+        network_id: "{{ network }}"
+
+    - name: create a the next network in {{ network_id.network }}
+      set_fact:
+        networkaddr: "{{ lookup('infoblox.nios_modules.nios_next_ip', network_id.network, provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+  
+    - name: Print return 
+      ansible.builtin.debug:
+        msg: 
+        - "{{ networkaddr }}"
+
+
+    - name: launching AWS instance using Ansible
+      ec2:
+        key_name: ec2-keypair
+        instance_type: t2.nano
+        image: ami-074cce78125f09d61
+        region: us-east-2
+        wait: yes
+        count: 1
+        instance_tags:
+          Name: dev11.lab.local
+        private_ip: "{{ networkaddr.0 }}"
+        vpc_subnet_id: "{{network_id.extattrs.my_subnet_id}}"
+        assign_public_ip: no
+        aws_access_key: "YOURKEY"
+        aws_secret_key: "YOURKEY"
+      register: ec2core
+
+    - name: configure a host
+      infoblox.nios_modules.nios_host_record:
+        name: dev11.lab.local
+        ipv4addrs:
+            - ipv4addr: "{{ networkaddr.0 }}"
+        comment: this is a test comment
+        state: present
+        provider: "{{nios_provider}}"

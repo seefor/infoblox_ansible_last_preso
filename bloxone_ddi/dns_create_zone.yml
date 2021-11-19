@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - infoblox.b1ddi_modules
+
+  vars_files:
+    - group_vars/csp.yml
+
+  tasks:
+    - name: Create DNS Authoritative Zone
+      b1_dns_auth_zone:
+        fqdn: "sifiizm.com"
+        view: "1Test-Ansible-View"
+        primary_type: "cloud"
+        internal_secondaries: 
+          - "sbaksh-01-ova"
+        tags:
+          - Owner: "sbaksh"
+        comment: "This is zone"
+        api_key: "{{ api }}"
+        host: "{{ host }}"
+        state: present
+

@@ -1,0 +1,39 @@
+# Line 3 to 15 is all for the VPC
+# NIOS look up information
+my_ea: {'SifLoc':'Sif'}
+network_cidr: 20
+
+# AWS VPC Creation
+vpc_net_name: Module_dev
+vpc_net_region: us-east-2
+vpc_net_tags_module: ec2_vpc_net
+vpc_net_tags_this: works
+vpc_net_tenancy: default
+
+# Create Container in NIOS
+nios_comment: AWS VPC
+nios_ea_site: Module_dev
+
+# Create Subnet from here down
+sub_ea: {'Site':'Module_dev'}
+sub_cidr: 24
+sub_name:  "Public Subnet"
+sub_comment: AWS Subnet
+sub_nios_site: Mod_Dev
+
+# Reserved first 3 IPs comments
+sub_three_comment: Reserved for AWS use
+sub_three_name: reserved
+
+# VM Instance Data
+ins_ea: {'Site':'Mod_Dev'}
+ins_keypair: ec2-keypair
+ins_ami: ami-074cce78125f09d61
+ins_fqdn: dev14.lab.local
+ins_nios_commnet: this is a test comment
+
+
+
+# AWS Creds
+my_access_key: "YOUR_KEY"
+my_secret_key: "YOUR_SECRET"

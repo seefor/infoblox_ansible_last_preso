@@ -1,0 +1,16 @@
+- name: create resources to build a VM
+  hosts: localhost
+  tasks:
+  - name: Create virtual machine
+    azure_rm_virtualmachine:
+      resource_group: myResourceGroup
+      name: testvm001
+      vm_size: Standard_B1ls
+      admin_username: youtubedemo
+      admin_password: Password123123
+      network_interfaces: testvm_nic1
+      image:
+        offer: UbuntuServer
+        publisher: Canonical
+        sku: 18.04-LTS
+        version: latest

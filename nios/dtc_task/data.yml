@@ -1,0 +1,8 @@
+---
+server:
+  - Server1
+  - Server2
+server_ip: 
+  - 1.1.1.1
+  - 1.1.1.2
+name: test

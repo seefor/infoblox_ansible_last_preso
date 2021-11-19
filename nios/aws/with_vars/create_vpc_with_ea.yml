@@ -1,0 +1,49 @@
+---
+- hosts: nios
+  vars_files:
+    - data.yml
+  connection: local
+  tasks:
+    - name: Look up the Network via Network Container EA
+      set_fact:
+        network: "{{ lookup('nios', 'networkcontainer', extattrs=my_ea,return_fields=['network','extattrs'],provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+    - name:               Set Network to a Variable
+      set_fact:
+        network_id:           "{{ network.network}}"
+
+    - name: Look up the next /{{ network_cidr }} in {{ network.network}}
+      set_fact:
+        networkaddr: "{{ lookup('infoblox.nios_modules.nios_next_network', network_id, cidr=network_cidr, provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+
+
+    - name: create a VPC with default tenancy and a couple of tags
+      ec2_vpc_net:
+        aws_access_key: "{{ my_access_key }}"
+        aws_secret_key: "{{ my_secret_key }}"
+        name: "{{ vpc_net_name }}"
+        cidr_block: "{{ item }}"
+        region: "{{ vpc_net_region }}"
+        tags:
+          module: "{{ vpc_net_tags_module }}"
+          this: "{{ vpc_net_tags_this }}"
+        tenancy: "{{ vpc_net_tenancy }}"
+      loop: "{{ networkaddr }}"
+      register: my_vpc
+
+    - name:               Set VPC ID in variable
+      set_fact:
+        vpc_id:           "{{ my_vpc.results.0.vpc.id }}"
+
+    - name: configure a network ipv4
+      infoblox.nios_modules.nios_network:
+        network: "{{ item }}"
+        comment: "{{ nios_comment }}"
+        container: true
+        extattrs:
+          my_vpc_id: "{{ vpc_id }}"
+          Site: "{{ nios_ea_site }}"
+        state: present
+        provider: "{{nios_provider}}"
+      loop: "{{ networkaddr }}"

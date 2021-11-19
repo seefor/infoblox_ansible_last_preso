@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - infoblox.b1ddi_modules
+
+  vars_files:
+    - group_vars/csp.yml
+
+  tasks:
+    - name: Create DNS Authoritative Zone
+      b1_dns_zone:
+        fqdn: "bob.com"
+        view: "1Test-Ansible-View"
+        external_forwarders: [
+            {
+                "address": sbaksh-01-ova
+            }
+        ]
+        forward_only: True
+        tags:
+          - Owner: "sbaksh"
+        comment: "This is zone"
+        api_key: "{{ api }}"
+        host: "{{ host }}"
+        state: present
+

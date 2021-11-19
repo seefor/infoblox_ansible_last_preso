@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - infoblox.b1ddi_modules
+
+  vars_files:
+    - group_vars/csp.yml
+
+  tasks:
+    - name: Create DNS View
+      b1_dns_view:
+        name: "1Test-Ansible-View"
+        tags:
+          - "Owner": "sbaksh"
+          - "Location": "Colorado"
+        comment: "This is playbook"
+        api_key: "{{ api }}"
+        host: "{{ host }}"
+        state: present

@@ -1,0 +1,15 @@
+- hosts: nios
+
+  connection: local
+  tasks:
+    - name: Create virtual network interface card
+      azure_rm_networkinterface:
+        name: testvm_nic1
+        resource_group: myResourceGroup
+        subnet_name: subnet001
+        virtual_network: testvn001
+        ip_configurations:
+        - name: private-ipconfig1
+          private_ip_address: 10.30.16.4
+          private_ip_allocation_method: Static
+          primary: True

@@ -1,0 +1,23 @@
+---
+- hosts: nios
+  vars_prompt:
+
+  - name: state
+    prompt: Do you want to add or delete?
+    private: no
+  - name: zone_name
+    prompt: Zone name to add or delete?
+    private: no
+
+
+  connection: local
+  tasks:
+   - name: Ansible Test 7 AM
+     infoblox.nios_modules.nios_zone:
+       name: "{{ zone_name }}"
+       view: default
+       extattrs:
+         Site: Sif Baksh
+       comment: Created with Ansible
+       state: "{{ state }}"
+       provider: "{{ nios_provider }}"

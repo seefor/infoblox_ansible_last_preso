@@ -1,0 +1,37 @@
+---
+- hosts: localhost
+  vars:
+    nios_provider:
+      host: 192.168.0.200
+      username: admin
+      password: infoblox
+      wapi_version: "2.12"
+
+  connection: local
+  tasks:
+  - name: 'create DTC Pool'
+    infoblox.nios_modules.nios_dtc_pool:
+      name: Deadpool
+      lb_preferred_method: ROUND_ROBIN
+      servers:
+      - server: Colossus
+        ratio: 1
+      monitors:
+      - name: monitor1
+        type: icmp
+      comment: Created with Ansible
+      state: present
+      provider: "{{ nios_provider }}"
+  - name: 'create 2nd Pool'
+    infoblox.nios_modules.nios_dtc_pool:
+      name: Sif
+      lb_preferred_method: ROUND_ROBIN
+      servers:
+      - server: Sif
+        ratio: 1
+      monitors:
+      - name: monitor1
+        type: icmp
+      comment: Created with Ansible
+      state: present
+      provider: "{{ nios_provider }}"

@@ -1,0 +1,14 @@
+---
+  - name: 'create DTC Pool'
+    infoblox.nios_modules.nios_dtc_pool:
+      name: Deadpool
+      lb_preferred_method: ROUND_ROBIN
+      servers:
+      - server: Colossus
+        ratio: 1
+      monitors:
+      - name: monitor1
+        type: icmp
+      comment: Created with Ansible
+      state: present
+      provider: "{{ nios_provider }}"

@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - infoblox.b1ddi_modules
+
+  vars_files:
+    - group_vars/csp.yml
+
+  tasks:
+    - name: CREATE DNS View 
+      b1_a_record:
+        api_key: "{{ api }}"
+        host: "{{ host }}"
+        zone: "sifiizm.com"
+        address: "10.10.10.2"
+        name: "test2"
+        view: "1Test-Ansible-View"
+        tags:
+          - Owner: "sbaksh"
+        comment: "This is zone"
+        state: absent

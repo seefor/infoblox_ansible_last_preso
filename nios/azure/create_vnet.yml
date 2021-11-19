@@ -1,0 +1,38 @@
+- hosts: nios
+
+  connection: local
+  tasks:
+    - name: Look up the Network via Network Container EA SifLoc
+      set_fact:
+        network: "{{ lookup('nios', 'networkcontainer', extattrs={'Site':'Texas'},return_fields=['network','extattrs'],provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+
+    - name:               Set Network to a Variable
+      set_fact:
+        network_id:           "{{ network.network}}"
+
+    - name: create a the next network
+      set_fact:
+        networkaddr: "{{ lookup('infoblox.nios_modules.nios_next_network', network_id, cidr=20, provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+
+    - name: Create virtual network
+      azure_rm_virtualnetwork:
+        resource_group: myResourceGroup
+        name: testvn001
+        tags:
+            testing: testing
+            delete: never
+        address_prefixes: "{{ networkaddr.0 }}"
+
+
+    - name: configure a network ipv4
+      infoblox.nios_modules.nios_network:
+        network: "{{ networkaddr.0 }}"
+        comment: Azure VPC
+        container: true
+        extattrs:
+          resource_group: myResourceGroup
+          Site: testvn001
+        state: present
+        provider: "{{nios_provider}}"

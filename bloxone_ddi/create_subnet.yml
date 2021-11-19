@@ -1,0 +1,21 @@
+---
+- hosts: localhost
+  connection: local
+
+  vars:
+  - host: "https://csp.infoblox.com"
+  - api: "APIKEY"
+
+  tasks:
+    #  Create a Subnet in a given IP space
+    - name: Create Subnet in a given IP Space
+      infoblox.b1ddi_modules.b1_ipam_subnet:
+        space: "1Test-Ansible-Space"
+        address: '172.16.0.0/24'
+        name: "Test-Ansible-Subnet1"
+        tags:
+          - "Owner": "sbaksh"
+          - "Location": "Colorado"
+        api_key: "{{ api }}"
+        host: "{{ host }}"
+        state: present

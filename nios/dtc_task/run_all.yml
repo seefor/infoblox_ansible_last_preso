@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  vars:
+    nios_provider:
+      host: 192.168.0.200
+      username: admin
+      password: infoblox
+      wapi_version: "2.12"
+
+  tasks:
+    - import_tasks: task_dtc_server.yml
+    - import_tasks: task_dtc_pool.yml
+    - import_tasks: task_dtc_lbdn.yml
+    - import_tasks: restart_services.yml

@@ -1,0 +1,35 @@
+---
+- hosts: localhost
+  vars:
+    nios_provider:
+      host: 192.168.0.200
+      username: admin
+      password: infoblox
+      wapi_version: "2.12"
+
+  connection: local
+  tasks:
+  - name: 'create DTC LBDN'
+    infoblox.nios_modules.nios_dtc_lbdn:
+      name: Marvel
+      lb_method: GLOBAL_AVAILABILITY
+      pools:
+      - pool: Deadpool
+        ratio: 2
+      - pool: Sif
+        ratio: 2
+      ttl: 100
+      auth_zones: 
+      - 'lab.local'
+      patterns: 
+      - '*.lab.local'
+      types:
+      - A
+      comment: Created with Ansible
+      state: present
+      provider: "{{ nios_provider }}"
+
+  - name: Restart Services
+    infoblox.nios_modules.nios_restartservices:
+      provider: "{{ nios_provider }}"
+... 

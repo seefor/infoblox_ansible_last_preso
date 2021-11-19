@@ -1,0 +1,21 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - infoblox.b1ddi_modules
+
+  vars:
+  - host: "https://csp.infoblox.com"
+  - api: "APIKEY"
+
+  tasks:
+    # Update the IP space
+    - name: Update the IPSpace
+      b1_ipam_ip_space:
+        name: "1Test-Ansible-Space"
+        tags:
+          - "Owner": "sbaksh"
+          - "Location": "Colorado"
+        host: "{{ host }}"
+        api_key: "{{ api }}"
+        state: present

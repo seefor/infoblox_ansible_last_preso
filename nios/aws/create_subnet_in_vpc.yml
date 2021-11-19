@@ -1,0 +1,79 @@
+---
+- hosts: nios
+
+  connection: local
+  tasks:
+    - name: Look up the Network via Network Container EA SifLoc
+      set_fact:
+        network: "{{ lookup('nios', 'networkcontainer', extattrs={'Site':'Module_dev'},return_fields=['network','extattrs'],provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+
+    - name:               Set Network to a Variable
+      set_fact:
+        network_id:           "{{ network }}"
+
+    - name: create a the next network in {{ network_id.network }}
+      set_fact:
+        networkaddr: "{{ lookup('infoblox.nios_modules.nios_next_network', network_id.network, cidr=24, provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+
+    - name:               Create Public Subnet
+      ec2_vpc_subnet:
+        state:            "present"
+        vpc_id:           "{{ network.extattrs.my_vpc_id }}"
+        cidr:             "{{ item }}"
+        aws_access_key: "YOURKEY"
+        aws_secret_key: "YOURKEY"
+        resource_tags:
+          Name:           "Public Subnet"
+      loop: "{{ networkaddr }}"
+      register: my_public_subnet
+
+    - name: Set Public Subnet ID in variable
+      set_fact:
+        public_subnet_id: "{{ my_public_subnet.results.0.subnet.id }}"
+
+    - name: configure a network ipv4 in NIOS
+      infoblox.nios_modules.nios_network:
+        network: "{{ item }}"
+        comment: AWS VPC
+        extattrs:
+          Site: Mod_Dev
+          my_subnet_id: "{{ public_subnet_id }}"
+        state: present
+        provider: "{{nios_provider}}"
+      loop: "{{ networkaddr }}"
+
+    - name: Split Network to a Variable
+      set_fact:
+        network_split: "{{ networkaddr.0.split('.')}}"
+
+    - name: Assign split variables of network to the frist three octect
+      set_fact:
+        first_octect: "{{network_split[0]}}"
+        second_octect: "{{network_split[1]}}"
+        third_octect: "{{network_split[2]}}"
+
+    - name: Create variable of the first three octect
+      set_fact:
+        first_three: "{{ first_octect }}.{{ second_octect }}.{{ third_octect }}."
+
+    - name: We will skip .1 .2 and .3 for the EC2 address
+      set_fact:
+        skip: 
+          - "{{first_three}}1"
+          - "{{first_three}}2"
+          - "{{first_three}}3"
+  
+    - name: Configure Reserved Address .1, .2 and .3
+      infoblox.nios_modules.nios_fixed_address:
+        name: reserved
+        ipaddr:  "{{ item }}"
+        mac: 00:00:00:00:00:00
+        network: "{{networkaddr.0}}"
+        network_view: default
+        comment: Reserved for AWS use
+        state: present
+        provider: "{{nios_provider}}"
+      loop: "{{ skip }}"
+      connection: local

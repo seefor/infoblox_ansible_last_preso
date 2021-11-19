@@ -1,0 +1,35 @@
+- hosts: nios
+
+  connection: local
+  tasks:
+    - name: Look up the Network via Network Container EA SifLoc
+      set_fact:
+        network: "{{ lookup('nios', 'networkcontainer', extattrs={'Site':'testvn001'},return_fields=['network','extattrs'],provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+
+    - name:               Set Network to a Variable
+      set_fact:
+        network_id:           "{{ network.network}}"
+
+    - name: create a the next network
+      set_fact:
+        networkaddr: "{{ lookup('infoblox.nios_modules.nios_next_network', network_id, cidr=24, provider=nios_provider) }}"
+        provider: "{{nios_provider}}"
+
+    - name: Add subnet
+      azure_rm_subnet:
+        resource_group: myResourceGroup
+        name: subnet001
+        address_prefix: "{{ networkaddr.0 }}"
+        virtual_network: testvn001
+
+    - name: configure a network ipv4
+      infoblox.nios_modules.nios_network:
+        network: "{{ networkaddr.0 }}"
+        comment: Azure Subnet
+        extattrs:
+          resource_group: myResourceGroup
+          Site: testvn001
+          my_subnet_id: subnet001
+        state: present
+        provider: "{{nios_provider}}"

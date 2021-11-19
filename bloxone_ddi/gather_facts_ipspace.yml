@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - infoblox.b1ddi_modules
+
+  vars:
+  - host: "https://csp.infoblox.com"
+  - api: "APIKEY"
+
+  tasks:
+    - name: gather ipspace record
+      b1_ipam_ip_space_gather:
+          host: "{{ host }}"
+          api_key: "{{ api }}"
+          state: gather
+          fields: ['id','tags']
+          filters: {"name": "sbaksh*"}
+          tfilters: {"Owner": "sbaksh"}
+      register: ptr_rec_lists
+    - debug: msg="{{ ptr_rec_lists1 }}"
+

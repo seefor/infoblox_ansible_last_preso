@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - infoblox.b1ddi_modules
+
+  vars_files:
+    - group_vars/csp.yml
+
+  tasks:
+    #  Create a Address Block in a given IP space using next_available_address_block
+    - name: Create Address Block using next-available subnet
+      b1_ipam_address_block:
+        space: "1Test-Ansible-Space"
+        address: '{"next_available_address_block": {"cidr": "28", "count": "2", "parent_block": "172.16.0.0/24"}}'
+        name: "Test-Ansible-AB_nextAvailable"
+        comment: "This is the test AB creation using nextavailable"
+        api_key: "{{ api }}"
+        host: "{{ host }}"
+        state: present

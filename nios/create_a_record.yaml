@@ -1,0 +1,14 @@
+---
+
+- hosts: nios
+
+  connection: local
+  tasks:
+   - name: Create Nios A record Test
+     infoblox.nios_modules.nios_a_record:
+       name: v99.lab.local
+       view: default
+       ipv4: 10.20.0.5
+       comment: Created with Ansible
+       state: present
+       provider: "{{ nios_provider }}"

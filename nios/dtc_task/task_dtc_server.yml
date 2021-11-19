@@ -1,0 +1,8 @@
+---
+ - name: 'create DTC server'
+   infoblox.nios_modules.nios_dtc_server:
+     name: Colossus
+     host: 192.168.0.201
+     comment: Created with Ansible
+     state: present
+     provider: "{{ nios_provider }}"

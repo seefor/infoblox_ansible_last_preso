@@ -1,0 +1,26 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - infoblox.b1ddi_modules
+
+  vars_files:
+    - group_vars/csp.yml
+
+  tasks:
+
+    #  Create a Range in a given subnet
+    - name: Create Range in a given IP Space
+      b1_ipam_range:
+        space: "1Test-Ansible-Space"
+        name: "Test-Ansible-Range1"
+        start: "172.16.0.100"
+        end: "172.16.0.200"
+        comment: "This is the test AB creation"
+        dhcp_host: "sbaksh-01-ova"
+        tags:
+          - "Owner": "sbaksh"
+          - "Location": "Colorado"
+        api_key: "{{ api }}"
+        host: "{{ host }}"
+        state: present

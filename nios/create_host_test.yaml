@@ -1,0 +1,17 @@
+---
+
+- hosts: nios
+
+  connection: local
+  tasks:
+    - name: configure a host
+      nios_host_record:
+        name: v90.lab.local
+        ipv4addrs:
+            - ipv4addr: 10.20.0.3
+        comment: this is a test comment
+        extattrs:
+          Site="Test"
+          Testing="Sif"
+        state: present
+        provider: "{{nios_provider}}"

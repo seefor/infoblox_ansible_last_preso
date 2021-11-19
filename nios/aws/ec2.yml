@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: launching AWS instance using Ansible
+      ec2:
+        key_name: ec2-keypair
+        instance_type: t2.nano
+        image: ami-074cce78125f09d61
+        region: us-east-2
+        wait: yes
+        count: 1
+        private_ip: 10.1.10.10
+        vpc_subnet_id: subnet-a5f823e9
+        assign_public_ip: no
+        aws_access_key: "TOKEN"
+        aws_secret_key: "TOKEN"
+      register: ec2core

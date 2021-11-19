@@ -1,0 +1,10 @@
+- name: create resources to build a VM
+  hosts: localhost
+  tasks:
+    - name: Create a resource group
+      azure_rm_resourcegroup:
+        name: myResourceGroup
+        location: westus
+        tags:
+            testing: testing
+            delete: never
